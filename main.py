@@ -1,5 +1,3 @@
-import tkinter as tk
-from tkinter import font
 import customtkinter as ctk
 import serial
 import serial.tools.list_ports
@@ -12,9 +10,9 @@ class Application(ctk.CTkFrame):
         top.rowconfigure(0, weight=1)
         top.columnconfigure(0, weight=1)
 
-        self.grid(sticky=tk.N + tk.S + tk.E + tk.W)
-        self.rowconfigure((0, 1, 2), weight=1)
-        self.columnconfigure(0, weight=1)
+        self.grid(sticky="nsew")
+        self.grid_rowconfigure((0, 1, 2), weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         # Configure window
         app_width = 600
@@ -26,22 +24,18 @@ class Application(ctk.CTkFrame):
         self.master.geometry(alignstr)
         self.master.title('Serial monitor')
 
-        # Font settings
-        default_font = font.nametofont("TkDefaultFont")
-        default_font.configure(family="Helvetica", size=16)
-
         self.initUI()
 
     def initUI(self):
         self.quitBtn = ctk.CTkButton(self, text='Quit', border_width=2, command=self.quit)
-        self.quitBtn.grid(row=0, column=0, sticky=tk.N + tk.S + tk.E + tk.W)
+        self.quitBtn.grid(row=0, column=0, sticky="nsew")
 
         # 新增按鈕
         self.newBtn1 = ctk.CTkButton(self, text='Button 1', border_width=2, command=self.onNewBtn1Click)
-        self.newBtn1.grid(row=1, column=0, sticky=tk.N + tk.S + tk.E + tk.W)
+        self.newBtn1.grid(row=1, column=0, sticky="nsew")
 
         self.newBtn2 = ctk.CTkButton(self, text='Button 2', border_width=2, command=self.onNewBtn2Click)
-        self.newBtn2.grid(row=2, column=0, sticky=tk.N + tk.S + tk.E + tk.W)
+        self.newBtn2.grid(row=2, column=0, sticky="nsew")
 
         # Create a Button with a gray border
         gray_border_button = ctk.CTkButton(self, text="Click Me", border_width=2)

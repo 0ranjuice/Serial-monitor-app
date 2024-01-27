@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
+
 class App:
     def __init__(self, root):
         # setting title and window size
@@ -13,7 +14,7 @@ class App:
 
         root.rowconfigure((0, 1, 2, 3, 4), weight=1)
 
-        ft = tkFont.Font(family='Times', size=10)
+        ft = tkFont.Font(family='Helvetica', size=10)
 
         # Using grid instead of place
         label_PortName = tk.Label(root, fg="#333333", font=ft, text="Port Name : ")
@@ -45,6 +46,7 @@ class App:
 
         ListBox_StopBits = tk.Listbox(root, borderwidth="1px", font=ft, fg="#333333")
         ListBox_StopBits.grid(row=4, column=1, padx=10, pady=10)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
