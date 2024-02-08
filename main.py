@@ -4,6 +4,7 @@ import serial.tools.list_ports
 
 ft = ('Helvetica', 18)  # Font
 
+
 class Application(ctk.CTkFrame):
     def __init__(self, master=None):
         ctk.CTkFrame.__init__(self, master)
@@ -12,9 +13,9 @@ class Application(ctk.CTkFrame):
         top.columnconfigure(0, weight=1)
 
         self.grid(sticky="nsew")
-        self.grid_rowconfigure((0,1), weight=1)
-        self.grid_columnconfigure((0,2), weight=1)
-        self.grid_columnconfigure(1, weight=0)
+        self.grid_rowconfigure((0, 1), weight=1)
+        self.grid_columnconfigure((0, 3), weight=1)
+        self.grid_columnconfigure((1, 2), weight=1)
 
         # Configure window
         app_width = 600
@@ -29,11 +30,11 @@ class Application(ctk.CTkFrame):
         self.initUI()
 
     def initUI(self):
-        # Create a frame to group labels and comboBoxes
-        frame_serialPortConfig = ctk.CTkFrame(self, fg_color="transparent")
-        frame_serialPortConfig.grid(row=0, column=1, sticky="nsew")
-        frame_serialPortConfig.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
-        frame_serialPortConfig.grid_columnconfigure((0, 1), weight=1)
+        # Create a frame to group the left serialPortConfig section (labels and comboBoxes)
+        frame_serialPortConfig_l = ctk.CTkFrame(self, fg_color="transparent")
+        frame_serialPortConfig_l.grid(row=0, column=1, sticky="ns")
+        frame_serialPortConfig_l.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
+        frame_serialPortConfig_l.grid_columnconfigure((0, 1), weight=1)
 
         print(self.grid_size())
 
@@ -44,38 +45,57 @@ class Application(ctk.CTkFrame):
         parity_options = ["None", "Even", "Odd"]
         stop_bits = ["1", "1.5", "2"]
 
-        """Add widgets to frame_serialPortConfig"""
+        """Add widgets to frame_serialPortConfig_l"""
         # Add labels
-        label_PortName = ctk.CTkLabel(frame_serialPortConfig, font=ft, text="Port Name : ")
+        label_PortName = ctk.CTkLabel(frame_serialPortConfig_l, font=ft, text="Port Name : ")
         label_PortName.grid(row=0, column=0)
 
-        label_BaudRate = ctk.CTkLabel(frame_serialPortConfig, font=ft, text="Baud Rate : ")
+        label_BaudRate = ctk.CTkLabel(frame_serialPortConfig_l, font=ft, text="Baud Rate : ")
         label_BaudRate.grid(row=1, column=0)
 
-        Label_DataBits = ctk.CTkLabel(frame_serialPortConfig, font=ft, text="Data Bits : ")
+        Label_DataBits = ctk.CTkLabel(frame_serialPortConfig_l, font=ft, text="Data Bits : ")
         Label_DataBits.grid(row=2, column=0)
 
-        Label_Parity = ctk.CTkLabel(frame_serialPortConfig, font=ft, text="Parity : ")
+        Label_Parity = ctk.CTkLabel(frame_serialPortConfig_l, font=ft, text="Parity : ")
         Label_Parity.grid(row=3, column=0)
 
-        Label_StopBits = ctk.CTkLabel(frame_serialPortConfig, font=ft, text="Stop Bits : ")
+        Label_StopBits = ctk.CTkLabel(frame_serialPortConfig_l, font=ft, text="Stop Bits : ")
         Label_StopBits.grid(row=4, column=0)
 
         # Add comboBoxes
-        ComboBox_PortName = ctk.CTkComboBox(frame_serialPortConfig, values=port_names, font=ft)
+        ComboBox_PortName = ctk.CTkComboBox(frame_serialPortConfig_l, values=port_names, font=ft)
         ComboBox_PortName.grid(row=0, column=1)
 
-        ComboBox_BaudRate = ctk.CTkComboBox(frame_serialPortConfig, values=baud_rates, font=ft)
+        ComboBox_BaudRate = ctk.CTkComboBox(frame_serialPortConfig_l, values=baud_rates, font=ft)
         ComboBox_BaudRate.grid(row=1, column=1)
 
-        ComboBox_DataBits = ctk.CTkComboBox(frame_serialPortConfig, values=data_bits, font=ft)
+        ComboBox_DataBits = ctk.CTkComboBox(frame_serialPortConfig_l, values=data_bits, font=ft)
         ComboBox_DataBits.grid(row=2, column=1)
 
-        ComboBox_Parity = ctk.CTkComboBox(frame_serialPortConfig, values=parity_options, font=ft)
+        ComboBox_Parity = ctk.CTkComboBox(frame_serialPortConfig_l, values=parity_options, font=ft)
         ComboBox_Parity.grid(row=3, column=1)
 
-        ComboBox_StopBits = ctk.CTkComboBox(frame_serialPortConfig, values=stop_bits, font=ft)
+        ComboBox_StopBits = ctk.CTkComboBox(frame_serialPortConfig_l, values=stop_bits, font=ft)
         ComboBox_StopBits.grid(row=4, column=1)
+
+        # Create a frame to group the right serialPortConfig section (buttons)
+        frame_serialPortConfig_r = ctk.CTkFrame(self, fg_color="transparent")
+        frame_serialPortConfig_r.grid(row=0, column=2, sticky="nsew")
+        frame_serialPortConfig_r.grid_rowconfigure((0, 1, 2, 3), weight=1)
+
+        """Add widgets to frame_serialPortConfig_l"""
+        # Add buttons
+        btn_start = ctk.CTkButton(frame_serialPortConfig_r, text="開始記錄", command=btn_start_clicked)
+        btn_start.grid(row=0, column=0)
+
+        btn_stop = ctk.CTkButton(frame_serialPortConfig_r, text="停止記錄", command=btn_stop_clicked)
+        btn_stop.grid(row=1, column=0)
+
+        btn_clear = ctk.CTkButton(frame_serialPortConfig_r, text="清除", command=btn_clear_clicked)
+        btn_clear.grid(row=2, column=0)
+
+        btn_look = ctk.CTkButton(frame_serialPortConfig_r, text="查看記錄", command=btn_look_clicked)
+        btn_look.grid(row=3, column=0)
 
 """
         self.quitBtn = ctk.CTkButton(self, text='Quit', border_width=2, command=self.quit)
@@ -101,6 +121,7 @@ class Application(ctk.CTkFrame):
         print("Button 2 clicked")
     """
 
+
 def list_serial_ports():
     ports = serial.tools.list_ports.comports()
     available_ports = []
@@ -115,8 +136,19 @@ available_ports = list_serial_ports()
 print("Available COM Ports:", available_ports)
 
 
-def connect_to_serial():
-    # code to connect to serial port
+def btn_start_clicked():
+    pass
+
+
+def btn_stop_clicked():
+    pass
+
+
+def btn_clear_clicked():
+    pass
+
+
+def btn_look_clicked():
     pass
 
 
