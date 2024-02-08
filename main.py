@@ -85,41 +85,29 @@ class Application(ctk.CTkFrame):
 
         """Add widgets to frame_serialPortConfig_l"""
         # Add buttons
-        btn_start = ctk.CTkButton(frame_serialPortConfig_r, text="開始記錄", font=self.ft, command=btn_start_clicked)
+        btn_start = ctk.CTkButton(frame_serialPortConfig_r, text="開始記錄", font=self.ft, command=self.btn_start_clicked)
         btn_start.grid(row=0, column=0, pady=15)
 
-        btn_stop = ctk.CTkButton(frame_serialPortConfig_r, text="停止記錄", font=self.ft, command=btn_stop_clicked)
+        btn_stop = ctk.CTkButton(frame_serialPortConfig_r, text="停止記錄", font=self.ft, command=self.btn_stop_clicked)
         btn_stop.grid(row=1, column=0, pady=15)
 
-        btn_clear = ctk.CTkButton(frame_serialPortConfig_r, text="清除", font=self.ft, command=btn_clear_clicked)
+        btn_clear = ctk.CTkButton(frame_serialPortConfig_r, text="清除", font=self.ft, command=self.btn_clear_clicked)
         btn_clear.grid(row=2, column=0, pady=15)
 
-        btn_look = ctk.CTkButton(frame_serialPortConfig_r, text="查看記錄", font=self.ft, command=btn_look_clicked)
+        btn_look = ctk.CTkButton(frame_serialPortConfig_r, text="查看記錄", font=self.ft, command=self.btn_look_clicked)
         btn_look.grid(row=3, column=0, pady=15)
 
-"""
-        self.quitBtn = ctk.CTkButton(self, text='Quit', border_width=2, command=self.quit)
-        self.quitBtn.grid(row=0, column=0, sticky="nsew")
+    def btn_start_clicked(self):
+        pass
 
-        # 新增按鈕
-        self.newBtn1 = ctk.CTkButton(self, text='Button 1', border_width=2, command=self.onNewBtn1Click)
-        self.newBtn1.grid(row=1, column=0, sticky="nsew")
+    def btn_stop_clicked(self):
+        pass
 
-        self.newBtn2 = ctk.CTkButton(self, text='Button 2', border_width=2, command=self.onNewBtn2Click)
-        self.newBtn2.grid(row=2, column=0, sticky="nsew")
+    def btn_clear_clicked(self):
+        pass
 
-        # Create a Button with a gray border
-        gray_border_button = ctk.CTkButton(self, text="Click Me", border_width=2)
-
-        # Pack the Button into the window
-        gray_border_button.grid(pady=20, padx=20)
-
-    def onNewBtn1Click(self):
-        print("Button 1 clicked")
-
-    def onNewBtn2Click(self):
-        print("Button 2 clicked")
-    """
+    def btn_look_clicked(self):
+        pass
 
 
 def list_serial_ports():
@@ -134,22 +122,6 @@ def list_serial_ports():
 # List and print all available COM ports
 available_ports = list_serial_ports()
 print("Available COM Ports:", available_ports)
-
-
-def btn_start_clicked():
-    pass
-
-
-def btn_stop_clicked():
-    pass
-
-
-def btn_clear_clicked():
-    pass
-
-
-def btn_look_clicked():
-    pass
 
 
 if __name__ == '__main__':
