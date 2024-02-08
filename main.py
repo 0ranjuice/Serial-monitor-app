@@ -11,7 +11,7 @@ class Application(ctk.CTkFrame):
         top.columnconfigure(0, weight=1)
 
         self.grid(sticky="nsew")
-        self.grid_rowconfigure((0, 1), weight=1)
+        self.grid_rowconfigure((0, 1, 2), weight=1)
         self.grid_columnconfigure((0, 3), weight=1)
         self.grid_columnconfigure((1, 2), weight=1)
 
@@ -30,9 +30,9 @@ class Application(ctk.CTkFrame):
         self.initUI()
 
     def initUI(self):
-        # Create a frame to group the left serialPortConfig section (labels and comboBoxes)
+        # Create a frame to group the left of serialPortConfig section (labels and comboBoxes)
         frame_serialPortConfig_l = ctk.CTkFrame(self, fg_color="transparent")
-        frame_serialPortConfig_l.grid(row=0, column=1, sticky="n")
+        frame_serialPortConfig_l.grid(row=0, column=1, sticky="ns")
         frame_serialPortConfig_l.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
         frame_serialPortConfig_l.grid_columnconfigure((0, 1), weight=1)
 
@@ -78,9 +78,9 @@ class Application(ctk.CTkFrame):
         ComboBox_StopBits = ctk.CTkComboBox(frame_serialPortConfig_l, values=stop_bits, font=self.ft)
         ComboBox_StopBits.grid(row=4, column=1, pady=10)
 
-        # Create a frame to group the right serialPortConfig section (buttons)
+        # Create a frame to group the right of serialPortConfig section (buttons)
         frame_serialPortConfig_r = ctk.CTkFrame(self, fg_color="transparent")
-        frame_serialPortConfig_r.grid(row=0, column=2, sticky="new")
+        frame_serialPortConfig_r.grid(row=0, column=2, sticky="nsew")
         frame_serialPortConfig_r.grid_rowconfigure((0, 1, 2, 3), weight=1)
 
         """Add widgets to frame_serialPortConfig_l"""
@@ -96,6 +96,11 @@ class Application(ctk.CTkFrame):
 
         btn_look = ctk.CTkButton(frame_serialPortConfig_r, text="查看記錄", font=self.ft, command=self.btn_look_clicked)
         btn_look.grid(row=3, column=0, pady=15)
+
+        """Add widget to the lower half"""
+        # Create the scrollableFrame
+        scrollableFrame_log = ctk.CTkScrollableFrame(self)
+        scrollableFrame_log.grid(row=1, column=1, columnspan=2, sticky="nsew", ipadx=80, pady=20)
 
     def btn_start_clicked(self):
         pass

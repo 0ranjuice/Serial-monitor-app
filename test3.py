@@ -1,26 +1,22 @@
-import tkinter as tk
+import customtkinter
 
-root = tk.Tk()
 
-canvas = tk.Canvas(root)
-scrollbar = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
-scrollable_frame = tk.Frame(canvas)
+class MyFrame(customtkinter.CTkScrollableFrame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
 
-scrollable_frame.bind(
-    "<Configure>",
-    lambda e: canvas.configure(
-        scrollregion=canvas.bbox("all")
-    )
-)
+        # add widgets onto the frame...
+        self.label = customtkinter.CTkLabel(self)
+        self.label.grid(row=0, column=0, padx=20)
 
-canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-canvas.configure(yscrollcommand=scrollbar.set)
 
-canvas.pack(side="left", fill="both", expand=True)
-scrollbar.pack(side="right", fill="y")
+class App(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
 
-# Add widgets to the scrollable_frame instead of root
-for i in range(50):
-    tk.Label(scrollable_frame, text="Sample scrolling label " + str(i)).pack()
+        self.my_frame = MyFrame(master=self, width=300, height=200)
+        self.my_frame.grid(row=0, column=0, padx=20, pady=20)
 
-root.mainloop()
+
+app = App()
+app.mainloop()
