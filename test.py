@@ -34,19 +34,23 @@ class App:
 
         ListBox_PortName = tk.Listbox(root, borderwidth="1px", font=ft, fg="#333333")
         ListBox_PortName.grid(row=0, column=1, padx=10, pady=10)
+        ListBox_PortName.configure(selectmode=tk.SINGLE)
 
         ListBox_BaudRate = tk.Listbox(root, borderwidth="1px", font=ft, fg="#333333")
         ListBox_BaudRate.grid(row=1, column=1, padx=10, pady=10)
+        ListBox_BaudRate.configure(selectmode=tk.SINGLE)
 
         ListBox_DataBits = tk.Listbox(root, borderwidth="1px", font=ft, fg="#333333")
         ListBox_DataBits.grid(row=2, column=1, padx=10, pady=10)
+        ListBox_DataBits.configure(selectmode=tk.SINGLE)
 
         ListBox_Parity = tk.Listbox(root, borderwidth="1px", font=ft, fg="#333333")
         ListBox_Parity.grid(row=3, column=1, padx=10, pady=10)
+        ListBox_Parity.configure(selectmode=tk.SINGLE)
 
         ListBox_StopBits = tk.Listbox(root, borderwidth="1px", font=ft, fg="#333333")
         ListBox_StopBits.grid(row=4, column=1, padx=10, pady=10)
-
+        ListBox_StopBits.configure(selectmode=tk.SINGLE)
 
 if __name__ == "__main__":
     root = tk.Tk()
