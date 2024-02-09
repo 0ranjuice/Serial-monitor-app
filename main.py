@@ -102,6 +102,11 @@ class Application(ctk.CTkFrame):
         scrollableFrame_log = ctk.CTkScrollableFrame(self)
         scrollableFrame_log.grid(row=1, column=1, columnspan=2, sticky="nsew", ipadx=80, pady=20)
 
+        """Top right corner"""
+        # Add the "隱藏" button in the top right corner
+        btn_hide = ctk.CTkButton(self, text="隱藏", font=self.ft, command=self.minimize_to_tray, width=10)
+        btn_hide.place(relx=1.0, rely=0.0, anchor="ne")  # Adjust placement as needed
+
     def btn_start_clicked(self):
         pass
 
@@ -112,6 +117,9 @@ class Application(ctk.CTkFrame):
         pass
 
     def btn_look_clicked(self):
+        pass
+
+    def minimize_to_tray(self):
         pass
 
 
