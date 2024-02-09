@@ -36,14 +36,12 @@ class Application(ctk.CTkFrame):
         frame_serialPortConfig_l.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
         frame_serialPortConfig_l.grid_columnconfigure((0, 1), weight=1)
 
-        print(self.grid_size())
-
         # Example data for the ComboBoxes
-        port_names = ["COM1", "COM2", "COM3"]
-        baud_rates = ["9600", "19200", "38400"]
-        data_bits = ["7", "8"]
+        port_names = list_serial_ports()
+        baud_rates = ["11520"]
+        data_bits = ["8"]
         parity_options = ["None", "Even", "Odd"]
-        stop_bits = ["1", "1.5", "2"]
+        stop_bits = ["1"]
 
         """Add widgets to frame_serialPortConfig_l"""
         # Add labels
@@ -102,6 +100,10 @@ class Application(ctk.CTkFrame):
         scrollableFrame_log = ctk.CTkScrollableFrame(self)
         scrollableFrame_log.grid(row=1, column=1, columnspan=2, sticky="nsew", ipadx=80, pady=20)
 
+    def clearUI(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+
     def btn_start_clicked(self):
         pass
 
@@ -112,7 +114,17 @@ class Application(ctk.CTkFrame):
         pass
 
     def btn_look_clicked(self):
-        pass
+        self.clearUI()
+        self.initLookupPage()
+
+    def initLookupPage(self):
+        # Method to draw the new page with only one button
+        btn_back = ctk.CTkButton(self, text="Back", font=self.ft, command=self.backToMainPage)
+        btn_back.pack(pady=20)
+
+    def backToMainPage(self):
+        self.clearUI()
+        self.initUI()
 
 
 def list_serial_ports():
