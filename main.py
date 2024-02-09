@@ -100,17 +100,15 @@ class Application(ctk.CTkFrame):
         scrollableFrame_log = ctk.CTkScrollableFrame(self)
         scrollableFrame_log.grid(row=1, column=1, columnspan=2, sticky="nsew", ipadx=80, pady=20)
 
-<<<<<<< HEAD
     def clearUI(self):
         for widget in self.winfo_children():
             widget.destroy()
-=======
+
         """Top right corner"""
         # Add the "隱藏" button in the top right corner
         btn_hide = ctk.CTkButton(self, text="隱藏", font=self.ft, command=self.minimize_to_tray, width=10)
         btn_hide.place(relx=1.0, rely=0.0, anchor="ne")  # Adjust placement as needed
->>>>>>> da5931d9f02d6c8f15ec03ab5df7f1c7676885d2
-
+        
     def btn_start_clicked(self):
         pass
 
