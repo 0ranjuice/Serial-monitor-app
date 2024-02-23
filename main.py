@@ -108,7 +108,7 @@ class Application(ctk.CTkFrame):
         # Add the "隱藏" button in the top right corner
         btn_hide = ctk.CTkButton(self, text="隱藏", font=self.ft, command=self.minimize_to_tray, width=10)
         btn_hide.place(relx=1.0, rely=0.0, anchor="ne")  # Adjust placement as needed
-        
+
     def btn_start_clicked(self):
         pass
 
