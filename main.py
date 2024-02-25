@@ -102,14 +102,36 @@ class Application(ctk.CTkFrame):
     def btn_look_clicked(self):
         # Create a child window
         self.child_window = ctk.CTkToplevel(self)
-        self.child_window.title("Child Window")
+        self.child_window.title("Log Lookup")
 
         # Set the geometry (size and position) of the child window
         self.child_window.geometry(f"{self.app_width}x{self.app_height}")  # Width x Height
 
-        # Create a button inside the child window
-        btn_in_child = ctk.CTkButton(self.child_window, text="Close Window")
-        btn_in_child.pack(pady=20)
+        # Date and time entry fields
+        date_entry = ctk.CTkEntry(self.child_window, placeholder_text="YYYY-MM-DD")
+        date_entry.pack(pady=10)
+        time_entry = ctk.CTkEntry(self.child_window, placeholder_text="HH:MM:SS")
+        time_entry.pack(pady=10)
+
+        # Search button
+        search_btn = ctk.CTkButton(self.child_window, text="Search Logs",
+                                   command=lambda: self.search_logs(date_entry.get(), time_entry.get()))
+        search_btn.pack(pady=20)
+
+        # Close button
+        close_btn = ctk.CTkButton(self.child_window, text="Close Window", command=self.child_window.destroy)
+        close_btn.pack(pady=10)
+
+    def search_logs(self, date_str, time_str):
+        # Convert date_str and time_str to a datetime object (you might want to add error handling)
+        try:
+            search_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S")
+            # Here you would call your function to retrieve and display the logs for this datetime
+            # For example: self.display_logs_for_datetime(search_datetime)
+            print(f"Searching for logs at {search_datetime}")
+        except ValueError as e:
+            print("Error parsing date/time. Please use the format YYYY-MM-DD for date and HH:MM:SS for time.")
+            # You might want to show this error in the GUI instead of printing
 
     def update_time(self):
         # Get the current time
