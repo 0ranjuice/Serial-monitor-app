@@ -16,6 +16,9 @@ class Application(ctk.CTkFrame):
         # Log message
         self.log_message = '心跳'
 
+        # Initialize a flag to control the update
+        self.update_time_flag = True
+
         # ctk
         ctk.CTkFrame.__init__(self, master)
         self.top = self.winfo_toplevel()
@@ -50,8 +53,9 @@ class Application(ctk.CTkFrame):
 
         print(self.grid_size())
 
-        # Example data for the ComboBoxes
+        # Data for the ComboBoxes
         port_names = list_serial_ports()
+
         baud_rates = 115200
         data_bits = 8
         parity_options = None
@@ -63,13 +67,19 @@ class Application(ctk.CTkFrame):
         label_PortName.grid(row=0, column=0, pady=10)
 
         # Add comboBoxes
-        ComboBox_PortName = ctk.CTkComboBox(frame_serialPortConfig_l, values=port_names, font=self.ft)
-        ComboBox_PortName.grid(row=0, column=1, pady=10)
+        self.ComboBox_PortName = ctk.CTkComboBox(frame_serialPortConfig_l, values=port_names, font=self.ft)
+        self.ComboBox_PortName.grid(row=0, column=1, pady=10)
+        self.ComboBox_PortName.set("")
 
         # Create a frame to group the right of serialPortConfig section (buttons)
         frame_serialPortConfig_r = ctk.CTkFrame(self, fg_color="transparent")
         frame_serialPortConfig_r.grid(row=0, column=2, sticky="nsew")
         frame_serialPortConfig_r.grid_rowconfigure((0, 1, 2, 3), weight=1)
+
+        # Add Connect button
+        btn_connect = ctk.CTkButton(frame_serialPortConfig_l, text="連接", font=self.ft,
+                                    command=self.btn_connect_clicked)
+        btn_connect.grid(row=1, column=0, columnspan=2)
 
         """Add widgets to frame_serialPortConfig_l"""
         # Add buttons
@@ -91,21 +101,37 @@ class Application(ctk.CTkFrame):
         self.textbox_log.grid(row=1, column=1, columnspan=2, sticky="nsew")
         self.textbox_log.configure(state="disabled")
 
-        self.update_time()
-
         """Top right corner"""
         # Add the "隱藏" button in the top right corner
         btn_hide = ctk.CTkButton(self, text="隱藏", font=self.ft, command=self.minimize_to_tray, width=10)
         btn_hide.place(relx=1.0, rely=0.0, anchor="ne")  # Adjust placement as needed
 
+    def btn_connect_clicked(self):
+        # Add functionality to connect to the selected COM port
+        selected_port = self.ComboBox_PortName.get()
+        if selected_port != "":
+            # Perform connection operations
+            # Example: Open serial connection to the selected port
+            print("Connecting to port:", selected_port)
+            # Add your connection code here
+        else:
+            # No port selected, display an error message or handle accordingly
+            print("No port selected. Please select a port before connecting.")
+
     def btn_start_clicked(self):
-        pass
+        # Set the update flag to True when recording starts
+        self.update_time_flag = True
+        self.update_time()
 
     def btn_stop_clicked(self):
-        pass
+        # Set the update flag to False when recording stops
+        self.update_time_flag = False
 
     def btn_clear_clicked(self):
-        pass
+        # Clear all text in the textbox_log
+        self.textbox_log.configure(state='normal')  # Enable the textbox for editing
+        self.textbox_log.delete('1.0', 'end')  # Delete all text
+        self.textbox_log.configure(state='disabled')  # Disable the textbox again
 
     def btn_look_clicked(self):
         self.build_log_viewer_UI()
@@ -128,13 +154,15 @@ class Application(ctk.CTkFrame):
         label_start_datetime = ctk.CTkLabel(self.child_window, font=self.ft, text="起始日期時間：")
         label_start_datetime.pack(pady=5)
 
-        entry_start_datetime = ctk.CTkEntry(self.child_window, width=190, font=self.ft, placeholder_text="YYYY-MM-DD HH:MM")
+        entry_start_datetime = ctk.CTkEntry(self.child_window, width=190, font=self.ft,
+                                            placeholder_text="YYYY-MM-DD HH:MM")
         entry_start_datetime.pack(pady=5)
 
         label_end_datetime = ctk.CTkLabel(self.child_window, font=self.ft, text="終止日期時間：")
         label_end_datetime.pack(pady=5)
 
-        entry_end_datetime = ctk.CTkEntry(self.child_window, width=190, font=self.ft, placeholder_text="YYYY-MM-DD HH:MM")
+        entry_end_datetime = ctk.CTkEntry(self.child_window, width=190, font=self.ft,
+                                          placeholder_text="YYYY-MM-DD HH:MM")
         entry_end_datetime.pack(pady=5)
 
         # Button to trigger log filtering
@@ -144,7 +172,8 @@ class Application(ctk.CTkFrame):
         btn_filter_logs.pack(pady=20)
 
         # Textbox for displaying filtered logs
-        self.textbox_filtered_logs = ctk.CTkTextbox(self.child_window, font=self.ft, width=400, corner_radius=0, height=200)
+        self.textbox_filtered_logs = ctk.CTkTextbox(self.child_window, font=self.ft, width=400, corner_radius=0,
+                                                    height=200)
         self.textbox_filtered_logs.pack(pady=20)
 
     def filter_logs(self, start_datetime_str, end_datetime_str):
@@ -194,7 +223,8 @@ class Application(ctk.CTkFrame):
         if hasattr(self, 'error_label'):
             self.error_label.configure(text=message)
         else:
-            self.error_label = ctk.CTkLabel(self.child_window, font=ctk.CTkFont(family="Microsoft YaHei", size=15), text=message, text_color="red")
+            self.error_label = ctk.CTkLabel(self.child_window, font=ctk.CTkFont(family="Microsoft YaHei", size=15),
+                                            text=message, text_color="red")
             self.error_label.pack(pady=5)
 
     def clear_error_message(self):
@@ -204,26 +234,28 @@ class Application(ctk.CTkFrame):
             del self.error_label  # Delete the reference to the label
 
     def update_time(self):
-        # Get the current time
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Check the update flag before updating the time
+        if self.update_time_flag:
+            # Get the current time
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # log the heartbeat
-        logging.info(self.log_message)
+            # Log the heartbeat
+            logging.info(self.log_message)
 
-        # Enable the text area temporarily to insert text
-        self.textbox_log.configure(state='normal')
+            # Enable the text area temporarily to insert text
+            self.textbox_log.configure(state='normal')
 
-        # Insert the current time at the end of the text area
-        self.textbox_log.insert('end', current_time + " 心跳" + '\n')
+            # Insert the current time at the end of the text area
+            self.textbox_log.insert('end', current_time + " 心跳" + '\n')
 
-        # Ensure the last line is always visible
-        self.textbox_log.see('end')
+            # Ensure the last line is always visible
+            self.textbox_log.see('end')
 
-        # Disable the text area again to prevent user interaction
-        self.textbox_log.configure(state='disabled')
+            # Disable the text area again to prevent user interaction
+            self.textbox_log.configure(state='disabled')
 
-        # Schedule the update_time method to be called after 1000ms (1 second)
-        self.top.after(1000, self.update_time)
+            # Schedule the update_time method to be called after 1000ms (1 second)
+            self.top.after(1000, self.update_time)
 
     def minimize_to_tray(self):
         pass
