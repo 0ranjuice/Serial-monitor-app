@@ -4,6 +4,7 @@ import serial.tools.list_ports
 from datetime import datetime
 import logging
 import os
+import threading
 
 
 class Application(ctk.CTkFrame):
@@ -53,9 +54,8 @@ class Application(ctk.CTkFrame):
 
         print(self.grid_size())
 
-        # Data for the ComboBoxes
+        # serial configuration
         port_names = list_serial_ports()
-
         baud_rates = 115200
         data_bits = 8
         parity_options = None
@@ -110,22 +110,100 @@ class Application(ctk.CTkFrame):
         # Add functionality to connect to the selected COM port
         selected_port = self.ComboBox_PortName.get()
         if selected_port != "":
-            # Perform connection operations
-            # Example: Open serial connection to the selected port
-            print("Connecting to port:", selected_port)
-            # Add your connection code here
+            try:
+                # Open a serial connection to the selected port
+                self.serial_connection = serial.Serial(selected_port, baudrate=115200)
+                print("Connected to port:", selected_port)
+
+                # If a hint label exists, remove it
+                if hasattr(self, 'hint_label'):
+                    self.hint_label.destroy()
+                    del self.hint_label
+            except serial.SerialException as e:
+                print("Error:", e)  # Print the error message if connection fails
+                # Provide a hint that a port needs to be connected and opened first
+                self.display_hint("Error connecting to port.")
         else:
             # No port selected, display an error message or handle accordingly
             print("No port selected. Please select a port before connecting.")
+            # Provide a hint that a port needs to be selected first
+            self.display_hint("Please select a port before connecting.")
 
     def btn_start_clicked(self):
-        # Set the update flag to True when recording starts
+        # Start listening to the serial port if it's open
+        if hasattr(self, 'serial_connection') and self.serial_connection.is_open:
+            # Start listening to the serial port in a separate thread
+            self.listening_thread = threading.Thread(target=self.listen_serial_port, daemon=True)
+            self.listening_thread.start()
+        else:
+            # Provide a hint that a port needs to be connected and opened first
+            self.display_hint("Please connect to an open port first.")
+
+        """
         self.update_time_flag = True
         self.update_time()
+        """
+
+    def display_hint(self, message):
+        # Display a hint message beneath the textbox_log
+        if hasattr(self, 'hint_label'):
+            self.hint_label.configure(text=message)
+        else:
+            self.hint_label = ctk.CTkLabel(self, font=self.ft, text=message, text_color="gray")
+            self.hint_label.grid(row=2, column=1, columnspan=2, sticky="nsew", pady=(5, 0))
+
+    def listen_serial_port(self):
+        # Function to continuously listen to the serial port
+        while True:
+            if hasattr(self, 'serial_connection') and self.serial_connection.is_open:
+                try:
+                    # Read data from the serial port
+                    received_data = self.serial_connection.readline().decode().strip()
+                    if received_data:
+                        # Log the received data to the textbox_log
+                        self.textbox_log.configure(state='normal')
+                        self.textbox_log.insert('end', f"{received_data}\n")
+                        self.textbox_log.see('end')  # Ensure the last line is visible
+                        self.textbox_log.configure(state='disabled')
+                except serial.SerialException as e:
+                    print("Error reading from serial port:", e)  # Print the error message
+                    self.display_hint("Error reading from serial port")
+
+    """
+    def update_time(self):
+        # Check the update flag before updating the time
+        if self.update_time_flag:
+            # Get the current time
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # Log the heartbeat
+            logging.info(self.log_message)
+
+            # Enable the text area temporarily to insert text
+            self.textbox_log.configure(state='normal')
+
+            # Insert the current time at the end of the text area
+            self.textbox_log.insert('end', current_time + " 心跳" + '\n')
+
+            # Ensure the last line is always visible
+            self.textbox_log.see('end')
+
+            # Disable the text area again to prevent user interaction
+            self.textbox_log.configure(state='disabled')
+
+            # Schedule the update_time method to be called after 1000ms (1 second)
+            self.top.after(1000, self.update_time)
+    """
 
     def btn_stop_clicked(self):
+        # Stop listening to the serial port
+        if hasattr(self, 'listening_thread') and self.listening_thread.is_alive():
+            self.listening_thread.join()  # Wait for the thread to finish
+
+        """
         # Set the update flag to False when recording stops
         self.update_time_flag = False
+        """
 
     def btn_clear_clicked(self):
         # Clear all text in the textbox_log
@@ -184,11 +262,11 @@ class Application(ctk.CTkFrame):
             # Handle the case where the datetime format is incorrect
             error_message = "日期時間格式錯誤！請使用 YYYY-MM-DD HH:MM 格式."
             # Display the error message
-            self.show_error_message(error_message)
+            self.show_filter_error_message(error_message)
             return
         else:
             # If the datetime format is correct, remove the error message label if it exists
-            self.clear_error_message()
+            self.clear_filter_error_message()
 
         # Continue with filtering logs
         filtered_logs = self.filter_logs_by_date_time(start_datetime, end_datetime)
@@ -218,7 +296,7 @@ class Application(ctk.CTkFrame):
 
         return filtered_logs
 
-    def show_error_message(self, message):
+    def show_filter_error_message(self, message):
         # Create or update an error message label
         if hasattr(self, 'error_label'):
             self.error_label.configure(text=message)
@@ -227,35 +305,11 @@ class Application(ctk.CTkFrame):
                                             text=message, text_color="red")
             self.error_label.pack(pady=5)
 
-    def clear_error_message(self):
+    def clear_filter_error_message(self):
         # Remove the error message label if it exists
         if hasattr(self, 'error_label'):
             self.error_label.pack_forget()  # Remove the label from the window
             del self.error_label  # Delete the reference to the label
-
-    def update_time(self):
-        # Check the update flag before updating the time
-        if self.update_time_flag:
-            # Get the current time
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            # Log the heartbeat
-            logging.info(self.log_message)
-
-            # Enable the text area temporarily to insert text
-            self.textbox_log.configure(state='normal')
-
-            # Insert the current time at the end of the text area
-            self.textbox_log.insert('end', current_time + " 心跳" + '\n')
-
-            # Ensure the last line is always visible
-            self.textbox_log.see('end')
-
-            # Disable the text area again to prevent user interaction
-            self.textbox_log.configure(state='disabled')
-
-            # Schedule the update_time method to be called after 1000ms (1 second)
-            self.top.after(1000, self.update_time)
 
     def minimize_to_tray(self):
         pass
