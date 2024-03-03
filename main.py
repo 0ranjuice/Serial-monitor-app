@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 import os
 import threading
+import queue
 
 
 class Application(ctk.CTkFrame):
@@ -14,11 +15,14 @@ class Application(ctk.CTkFrame):
         logging.basicConfig(filename=self.logFile, level=logging.INFO,
                             format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
-        # Log message
-        self.log_message = '心跳'
+        # Initialize connection control flag
+        self.connection_status = False
 
-        # Initialize a flag to control the update
-        self.update_time_flag = True
+        # Initialize recording control
+        self.recording_status = False
+
+        # Initialize a queue for thread communication
+        self.queue = queue.Queue()
 
         # ctk
         ctk.CTkFrame.__init__(self, master)
@@ -76,18 +80,14 @@ class Application(ctk.CTkFrame):
         frame_serialPortConfig_r.grid(row=0, column=2, sticky="nsew")
         frame_serialPortConfig_r.grid_rowconfigure((0, 1, 2, 3), weight=1)
 
-        # Add Connect button
-        btn_connect = ctk.CTkButton(frame_serialPortConfig_l, text="連接", font=self.ft,
-                                    command=self.btn_connect_clicked)
-        btn_connect.grid(row=1, column=0, columnspan=2)
-
         """Add widgets to frame_serialPortConfig_l"""
         # Add buttons
-        btn_start = ctk.CTkButton(frame_serialPortConfig_r, text="開始記錄", font=self.ft,
-                                  command=self.btn_start_clicked)
-        btn_start.grid(row=0, column=0, pady=15)
+        self.btn_start = ctk.CTkButton(frame_serialPortConfig_r, text="開始記錄", font=self.ft,
+                                       command=self.btn_start_clicked)
+        self.btn_start.grid(row=0, column=0, pady=15)
 
-        btn_stop = ctk.CTkButton(frame_serialPortConfig_r, text="停止記錄", font=self.ft, command=self.btn_stop_clicked)
+        btn_stop = ctk.CTkButton(frame_serialPortConfig_r, text="停止並斷開", font=self.ft,
+                                 command=self.btn_stop_clicked)
         btn_stop.grid(row=1, column=0, pady=15)
 
         btn_clear = ctk.CTkButton(frame_serialPortConfig_r, text="清除", font=self.ft, command=self.btn_clear_clicked)
@@ -106,43 +106,32 @@ class Application(ctk.CTkFrame):
         btn_hide = ctk.CTkButton(self, text="隱藏", font=self.ft, command=self.minimize_to_tray, width=10)
         btn_hide.place(relx=1.0, rely=0.0, anchor="ne")  # Adjust placement as needed
 
-    def btn_connect_clicked(self):
-        # Add functionality to connect to the selected COM port
+    def btn_start_clicked(self):
+        if self.recording_status:
+            print("Recording already in progress.")
+            return
+
         selected_port = self.ComboBox_PortName.get()
         if selected_port != "":
             try:
-                # Open a serial connection to the selected port
                 self.serial_connection = serial.Serial(selected_port, baudrate=115200)
                 print("Connected to port:", selected_port)
-
-                # If a hint label exists, remove it
+                # Clear hint
                 if hasattr(self, 'hint_label'):
                     self.hint_label.destroy()
                     del self.hint_label
+
+                # Start listening to the serial port in a separate thread
+                self.listening_thread = threading.Thread(target=self.listen_serial_port, daemon=True)
+                self.listening_thread.start()
+                self.recording_status = True
+                self.btn_start.configure(state='disabled')  # Disable the start button while recording
+
             except serial.SerialException as e:
-                print("Error:", e)  # Print the error message if connection fails
-                # Provide a hint that a port needs to be connected and opened first
+                print("Error:", e)
                 self.display_hint("Error connecting to port.")
         else:
-            # No port selected, display an error message or handle accordingly
-            print("No port selected. Please select a port before connecting.")
-            # Provide a hint that a port needs to be selected first
-            self.display_hint("Please select a port before connecting.")
-
-    def btn_start_clicked(self):
-        # Start listening to the serial port if it's open
-        if hasattr(self, 'serial_connection') and self.serial_connection.is_open:
-            # Start listening to the serial port in a separate thread
-            self.listening_thread = threading.Thread(target=self.listen_serial_port, daemon=True)
-            self.listening_thread.start()
-        else:
-            # Provide a hint that a port needs to be connected and opened first
-            self.display_hint("Please connect to an open port first.")
-
-        """
-        self.update_time_flag = True
-        self.update_time()
-        """
+            self.display_hint("Please select a port before starting.")
 
     def display_hint(self, message):
         # Display a hint message beneath the textbox_log
@@ -157,12 +146,21 @@ class Application(ctk.CTkFrame):
         while True:
             if hasattr(self, 'serial_connection') and self.serial_connection.is_open:
                 try:
+                    # Check for signals from the queue
+                    if not self.queue.empty():
+                        signal = self.queue.get()
+                        if signal == 'STOP':
+                            break  # Exit the loop if the stop signal is received
+
                     # Read data from the serial port
-                    received_data = self.serial_connection.readline().decode().strip()
+                    received_data = self.serial_connection.readline().decode('ascii').strip()
                     if received_data:
+                        logging.info(received_data)
+                        # Get the current time
+                        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         # Log the received data to the textbox_log
                         self.textbox_log.configure(state='normal')
-                        self.textbox_log.insert('end', f"{received_data}\n")
+                        self.textbox_log.insert('end', f"{current_time} {received_data}\n")
                         self.textbox_log.see('end')  # Ensure the last line is visible
                         self.textbox_log.configure(state='disabled')
                 except serial.SerialException as e:
@@ -196,14 +194,18 @@ class Application(ctk.CTkFrame):
     """
 
     def btn_stop_clicked(self):
-        # Stop listening to the serial port
+        # Stop the listening thread if it's running
         if hasattr(self, 'listening_thread') and self.listening_thread.is_alive():
-            self.listening_thread.join()  # Wait for the thread to finish
+            self.recording_status = False  # Update recording status
 
-        """
-        # Set the update flag to False when recording stops
-        self.update_time_flag = False
-        """
+            # Send a signal to the listening thread to stop
+            self.queue.put('STOP')
+
+            # Enable the start button after stopping recording
+            self.btn_start.configure(state='normal')
+            self.serial_connection.close()
+        else:
+            print("No recording in progress.")
 
     def btn_clear_clicked(self):
         # Clear all text in the textbox_log
@@ -323,10 +325,6 @@ def list_serial_ports():
         available_ports.append(port)
     return available_ports
 
-
-# List and print all available COM ports
-available_ports = list_serial_ports()
-print("Available COM Ports:", available_ports)
 
 if __name__ == '__main__':
     app = Application()

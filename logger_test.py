@@ -1,19 +1,20 @@
-import logging
 import time
 import random
-
-# 設置logger
-logging.basicConfig(filename=r'C:\Users\Hank\Downloads\serial_monitor/random_numbers.log', level=logging.INFO,
-                    format='%(asctime)s:%(message)s')
+import serial
 
 
 def generate_random_number():
-    """生成一個隨機的8位數並記錄到日誌文件中"""
+    """Generate a random 8-digit number and send it to COM2"""
+    ser = serial.Serial('COM2')  # Open COM2 port
+
     while True:
-        random_number = random.randint(10000000, 99999999)  # 生成一個隨機的8位數
-        logging.info(random_number)  # 將隨機數記錄到日誌中
-        time.sleep(1)  # 每秒生成一次
+        random_number = random.randint(10000000, 99999999)  # Generate a random 8-digit number
+        random_number_str = (str(random_number)+'\n').encode()  # Convert the number to bytes
+
+        ser.write(random_number_str)  # Send the random number to COM2
+
+        time.sleep(1)  # Wait for 1 second before sending the next number
 
 
-# 啟動生成隨機數的過程
+# Start the process of generating random numbers and sending them to COM2
 generate_random_number()
