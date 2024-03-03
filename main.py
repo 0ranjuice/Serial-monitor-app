@@ -167,32 +167,6 @@ class Application(ctk.CTkFrame):
                     print("Error reading from serial port:", e)  # Print the error message
                     self.display_hint("Error reading from serial port")
 
-    """
-    def update_time(self):
-        # Check the update flag before updating the time
-        if self.update_time_flag:
-            # Get the current time
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            # Log the heartbeat
-            logging.info(self.log_message)
-
-            # Enable the text area temporarily to insert text
-            self.textbox_log.configure(state='normal')
-
-            # Insert the current time at the end of the text area
-            self.textbox_log.insert('end', current_time + " 心跳" + '\n')
-
-            # Ensure the last line is always visible
-            self.textbox_log.see('end')
-
-            # Disable the text area again to prevent user interaction
-            self.textbox_log.configure(state='disabled')
-
-            # Schedule the update_time method to be called after 1000ms (1 second)
-            self.top.after(1000, self.update_time)
-    """
-
     def btn_stop_clicked(self):
         # Stop the listening thread if it's running
         if hasattr(self, 'listening_thread') and self.listening_thread.is_alive():
