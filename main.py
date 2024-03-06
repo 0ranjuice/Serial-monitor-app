@@ -121,6 +121,13 @@ class Application(ctk.CTkFrame):
                     self.hint_label.destroy()
                     del self.hint_label
 
+                # Log "Start recording"
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.textbox_log.configure(state='normal')
+                self.textbox_log.insert('end', f"{current_time} 開始記錄\n")
+                self.textbox_log.see('end')  # Ensure the last line is visible
+                self.textbox_log.configure(state='disabled')
+
                 # Start listening to the serial port in a separate thread
                 self.listening_thread = threading.Thread(target=self.listen_serial_port, daemon=True)
                 self.listening_thread.start()
@@ -153,7 +160,7 @@ class Application(ctk.CTkFrame):
                             break  # Exit the loop if the stop signal is received
 
                     # Read data from the serial port
-                    received_data = self.serial_connection.readline().decode('ascii').strip()
+                    received_data = self.serial_connection.readline().decode().strip()
                     if received_data:
                         logging.info(received_data)
                         # Get the current time
@@ -178,6 +185,13 @@ class Application(ctk.CTkFrame):
             # Enable the start button after stopping recording
             self.btn_start.configure(state='normal')
             self.serial_connection.close()
+
+            # Log "Stop recording"
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.textbox_log.configure(state='normal')
+            self.textbox_log.insert('end', f"{current_time} 停止記錄\n")
+            self.textbox_log.see('end')  # Ensure the last line is visible
+            self.textbox_log.configure(state='disabled')
         else:
             print("No recording in progress.")
 
