@@ -219,19 +219,30 @@ class Application(ctk.CTkFrame):
 
         # Date and Time selection widgets
         # You may need to adjust the styling and positioning based on your layout
-        label_start_datetime = ctk.CTkLabel(self.child_window, font=self.ft, text="起始日期時間：")
-        label_start_datetime.pack(pady=5)
+        frame_datetime = ctk.CTkFrame(self.child_window, fg_color="transparent")
+        frame_datetime.pack(pady=10)
 
-        entry_start_datetime = ctk.CTkEntry(self.child_window, width=190, font=self.ft,
+        label_start_datetime = ctk.CTkLabel(frame_datetime, font=self.ft, text="起始日期時間：")
+        label_start_datetime.grid(row=0, column=0, padx=(0, 10))
+
+        entry_start_datetime = ctk.CTkEntry(frame_datetime, width=190, font=self.ft,
                                             placeholder_text="YYYY-MM-DD HH:MM")
-        entry_start_datetime.pack(pady=5)
+        entry_start_datetime.grid(row=1, column=0, padx=(0, 10))
 
-        label_end_datetime = ctk.CTkLabel(self.child_window, font=self.ft, text="終止日期時間：")
-        label_end_datetime.pack(pady=5)
+        label_end_datetime = ctk.CTkLabel(frame_datetime, font=self.ft, text="終止日期時間：")
+        label_end_datetime.grid(row=0, column=1, padx=(20, 10))
 
-        entry_end_datetime = ctk.CTkEntry(self.child_window, width=190, font=self.ft,
+        entry_end_datetime = ctk.CTkEntry(frame_datetime, width=190, font=self.ft,
                                           placeholder_text="YYYY-MM-DD HH:MM")
-        entry_end_datetime.pack(pady=5)
+        entry_end_datetime.grid(row=1, column=1, padx=(20, 10))
+
+        # Create a frame for the checkboxes and labels
+        frame_checkboxes = ctk.CTkFrame(self.child_window, fg_color="transparent")
+        frame_checkboxes.pack(pady=10)
+
+        # Add log checkboxes and labels in a 3 by 3 layout
+        filter_checkbox_labels = ["解除", "呼叫", "遙控退出鍵", "心跳", "設定鍵", "退出鍵", "UP鍵", "DOWN鍵",
+                                  "清除號碼"]
 
         # Button to trigger log filtering
         btn_filter_logs = ctk.CTkButton(self.child_window, font=self.ft, text="查詢",
