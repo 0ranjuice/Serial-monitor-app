@@ -243,6 +243,22 @@ class Application(ctk.CTkFrame):
         # Add log checkboxes and labels in a 3 by 3 layout
         filter_checkbox_labels = ["解除", "呼叫", "遙控退出鍵", "心跳", "設定鍵", "退出鍵", "UP鍵", "DOWN鍵",
                                   "清除號碼"]
+        self.checkbox_vars = []  # to store IntVars for checkboxes
+
+        for i, label_text in enumerate(filter_checkbox_labels):
+            row = i // 3
+            column = i % 3
+
+            checkbox_var = ctk.IntVar(value=1)  # default value 1
+            self.checkbox_vars.append(checkbox_var)
+
+            checkbox = ctk.CTkCheckBox(frame_checkboxes, text=label_text, font=self.ft, variable=checkbox_var)
+            checkbox.grid(row=row, column=column, padx=10, pady=5, sticky="w")
+
+            # Trace changes in the checkbox
+            checkbox_var.trace_add("write",
+                                   lambda *args, var=checkbox_var, label=label_text: self.filter_checkbox_changed(
+                                       var, label, args))
 
         # Button to trigger log filtering
         btn_filter_logs = ctk.CTkButton(self.child_window, font=self.ft, text="查詢",
@@ -254,6 +270,13 @@ class Application(ctk.CTkFrame):
         self.textbox_filtered_logs = ctk.CTkTextbox(self.child_window, font=self.ft, width=400, corner_radius=0,
                                                     height=200)
         self.textbox_filtered_logs.pack(pady=20)
+
+    def filter_checkbox_changed(self, var, label, *args):
+        print(args)
+        if var.get() == 1:
+            print(f"Checkbox '{label}' changed to checked.")
+        else:
+            print(f"Checkbox '{label}' changed to unchecked.")
 
     def filter_logs(self, start_datetime_str, end_datetime_str):
         try:
