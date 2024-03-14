@@ -160,7 +160,7 @@ class Application(ctk.CTkFrame):
                             break  # Exit the loop if the stop signal is received
 
                     # Read data from the serial port
-                    received_data = self.serial_connection.readline().decode().strip()
+                    received_data = self.serial_connection.read(size=19).decode().strip()
                     if received_data:
                         logging.info(received_data)
                         # Get the current time
@@ -173,6 +173,7 @@ class Application(ctk.CTkFrame):
                 except serial.SerialException as e:
                     print("Error reading from serial port:", e)  # Print the error message
                     self.display_hint("Error reading from serial port")
+
 
     def btn_stop_clicked(self):
         # Stop the listening thread if it's running
@@ -305,7 +306,7 @@ class Application(ctk.CTkFrame):
     def filter_logs_by_date_time(self, start_datetime, end_datetime):
         filtered_logs = []
         # Read logs from the log file
-        with open(self.logFile, 'r') as file:
+        with open(self.logFile, 'r', encoding='utf-8') as file:
             for line in file:
                 # Extract timestamp and log message from each line
                 parts = line.strip().split(' ')
@@ -316,9 +317,20 @@ class Application(ctk.CTkFrame):
 
                     # Check if the log timestamp is within the specified range
                     if start_datetime <= log_timestamp <= end_datetime:
-                        filtered_logs.append(line.strip())
+                        # Check if the log message matches any of the checked checkboxes
+                        if self.check_log_message(log_message):
+                            filtered_logs.append(line.strip())
 
         return filtered_logs
+
+    def check_log_message(self, log_message):
+        # Check if the log message matches any of the checked checkboxes
+        for i, checkbox_var in enumerate(self.checkbox_vars):
+            if checkbox_var.get() == 1:
+                label_text = ["解除", "呼叫", "遙控退出鍵", "心跳", "設定鍵", "退出鍵", "UP鍵", "DOWN鍵", "清除號碼"][i]
+                if label_text in log_message:
+                    return True
+        return False
 
     def show_filter_error_message(self, message):
         # Create or update an error message label
