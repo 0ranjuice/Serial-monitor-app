@@ -10,6 +10,16 @@ import queue
 
 class Application(ctk.CTkFrame):
     def __init__(self, master=None):
+        # Log類別
+        self.categories = {"0": "解除",
+                           "1": "呼叫",
+                           "3": "遙控退出鍵",
+                           "4": "心跳",
+                           "5": "設定鍵",
+                           "6": "退出鍵",
+                           "7": "UP鍵",
+                           "8": "DOWN鍵",
+                           "9": "清除號碼"}
         # 設置logger
         self.logFile = os.getcwd() + "/Log.log"
         logging.basicConfig(filename=self.logFile, level=logging.INFO,
@@ -114,8 +124,7 @@ class Application(ctk.CTkFrame):
         selected_port = self.ComboBox_PortName.get()
         if selected_port != "":
             try:
-                self.serial_connection = serial.Serial(selected_port, baudrate=115200)
-                print("Connected to port:", selected_port)
+                self.serial_connection = serial.Serial(selected_port, baudrate=115200, timeout=0.1)
                 # Clear hint
                 if hasattr(self, 'hint_label'):
                     self.hint_label.destroy()
@@ -161,15 +170,26 @@ class Application(ctk.CTkFrame):
 
                     # Read data from the serial port
                     received_data = self.serial_connection.read(size=19).decode().strip()
-                    if received_data:
-                        logging.info(received_data)
-                        # Get the current time
-                        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        # Log the received data to the textbox_log
-                        self.textbox_log.configure(state='normal')
-                        self.textbox_log.insert('end', f"{current_time} {received_data}\n")
-                        self.textbox_log.see('end')  # Ensure the last line is visible
-                        self.textbox_log.configure(state='disabled')
+                    if len(received_data) == 19:
+                        if received_data.startswith("f") and received_data.endswith("w"):
+                            log_category = self.categories[received_data[17]]
+                            logging.info(log_category)
+                            # Get the current time
+                            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            # Log the received data to the textbox_log
+                            self.textbox_log.configure(state='normal')
+                            self.textbox_log.insert('end', f"{current_time} {log_category}\n")
+                            self.textbox_log.see('end')  # Ensure the last line is visible
+                            self.textbox_log.configure(state='disabled')
+                        else:
+                            logging.info("資料異常")
+                            # Get the current time
+                            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            # Log the received data to the textbox_log
+                            self.textbox_log.configure(state='normal')
+                            self.textbox_log.insert('end', f"{current_time} 資料異常\n")
+                            self.textbox_log.see('end')  # Ensure the last line is visible
+                            self.textbox_log.configure(state='disabled')
                 except serial.SerialException as e:
                     print("Error reading from serial port:", e)  # Print the error message
                     self.display_hint("Error reading from serial port")
@@ -242,11 +262,9 @@ class Application(ctk.CTkFrame):
         frame_checkboxes.pack(pady=10)
 
         # Add log checkboxes and labels in a 3 by 3 layout
-        filter_checkbox_labels = ["解除", "呼叫", "遙控退出鍵", "心跳", "設定鍵", "退出鍵", "UP鍵", "DOWN鍵",
-                                  "清除號碼"]
         self.checkbox_vars = []  # to store IntVars for checkboxes
 
-        for i, label_text in enumerate(filter_checkbox_labels):
+        for i, label_text in enumerate([c for c in self.categories.values()]):
             row = i // 3
             column = i % 3
 
@@ -267,17 +285,19 @@ class Application(ctk.CTkFrame):
                                                                          entry_end_datetime.get()))
         btn_filter_logs.pack(pady=20)
 
-        # Textbox for displaying filtered logs
+        # Textbox for displaying filtered logs3
         self.textbox_filtered_logs = ctk.CTkTextbox(self.child_window, font=self.ft, width=400, corner_radius=0,
                                                     height=200)
         self.textbox_filtered_logs.pack(pady=20)
 
+    """
     def filter_checkbox_changed(self, var, label, *args):
         print(args)
         if var.get() == 1:
             print(f"Checkbox '{label}' changed to checked.")
         else:
             print(f"Checkbox '{label}' changed to unchecked.")
+    """
 
     def filter_logs(self, start_datetime_str, end_datetime_str):
         try:
@@ -327,7 +347,7 @@ class Application(ctk.CTkFrame):
         # Check if the log message matches any of the checked checkboxes
         for i, checkbox_var in enumerate(self.checkbox_vars):
             if checkbox_var.get() == 1:
-                label_text = ["解除", "呼叫", "遙控退出鍵", "心跳", "設定鍵", "退出鍵", "UP鍵", "DOWN鍵", "清除號碼"][i]
+                label_text = self.categories[i]
                 if label_text in log_message:
                     return True
         return False
