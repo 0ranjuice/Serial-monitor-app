@@ -22,7 +22,7 @@ class Application(ctk.CTkFrame):
                            "9": "清除號碼"}
         # 設置logger
         self.logFile = os.getcwd() + "/Log.log"
-        logging.basicConfig(filename=self.logFile, level=logging.INFO,
+        logging.basicConfig(filename=self.logFile, encoding='utf-8', level=logging.INFO,
                             format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
         # Initialize connection control flag
