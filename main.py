@@ -145,9 +145,9 @@ class Application(ctk.CTkFrame):
 
             except serial.SerialException as e:
                 print("Error:", e)
-                self.display_hint("Error connecting to port.")
+                self.display_hint("連線錯誤")
         else:
-            self.display_hint("Please select a port before starting.")
+            self.display_hint("請選擇埠口以開始記錄")
 
     def display_hint(self, message):
         # Display a hint message beneath the textbox_log
