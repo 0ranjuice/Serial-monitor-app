@@ -1,29 +1,32 @@
-import customtkinter as tk
+import tkinter as tk
 
+def on_go_clicked():
+    checked_boxes = [box_text[i] for i, var in enumerate(checkbox_vars) if var.get() == 1]
+    if checked_boxes:
+        print("Checked boxes:", ", ".join(checked_boxes))
+    else:
+        print("No boxes checked")
 
-def on_checkbox_change(checkbox, var):
-    print(f"Checkbox {checkbox} changed. Current value: {var.get()}")
+# Create the main window
+root = tk.Tk()
+root.title("Checkbox Checker")
 
+# Checkboxes text
+box_text = ["alpha", "beta", "gamma", "x", "y", "z", "one", "two", "three"]
 
-def main():
-    root = tk.CTk()
+# Variable to store checkbox state
+checkbox_vars = [tk.IntVar() for _ in range(len(box_text))]
 
-    checkbox_vars = []
-    checkboxes = []
+# Create checkboxes
+checkboxes = [tk.Checkbutton(root, text=box_text[i], variable=checkbox_vars[i]) for i in range(len(box_text))]
 
-    for i in range(1, 5):
-        var = tk.BooleanVar(value=True)
-        checkbox_var = f"Checkbox {i}"
-        checkbox_vars.append((checkbox_var, var))
+# Arrange checkboxes using grid layout
+for i, checkbox in enumerate(checkboxes):
+    checkbox.grid(row=i // 3, column=i % 3, sticky="w")
 
-        checkbox = tk.CTkCheckBox(root, text=f"Checkbox {i}", variable=var)
-        checkbox.grid(row=i - 1, column=0, padx=10, pady=5)
-        checkboxes.append(checkbox)
+# Create Go button
+go_button = tk.Button(root, text="GO", command=on_go_clicked)
+go_button.grid(row=len(box_text)//3 + 1, column=1)
 
-        var.trace_add('write', lambda *args, checkbox_var=checkbox_var, var=var: on_checkbox_change(checkbox_var, var))
-
-    root.mainloop()
-
-
-if __name__ == "__main__":
-    main()
+# Start the GUI
+root.mainloop()

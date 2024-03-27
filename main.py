@@ -194,7 +194,6 @@ class Application(ctk.CTkFrame):
                     print("Error reading from serial port:", e)  # Print the error message
                     self.display_hint("Error reading from serial port")
 
-
     def btn_stop_clicked(self):
         # Stop the listening thread if it's running
         if hasattr(self, 'listening_thread') and self.listening_thread.is_alive():
@@ -264,7 +263,7 @@ class Application(ctk.CTkFrame):
         # Add log checkboxes and labels in a 3 by 3 layout
         self.checkbox_vars = []  # to store IntVars for checkboxes
 
-        for i, label_text in enumerate([c for c in self.categories.values()]):
+        for i, label_text in enumerate(self.categories.values()):
             row = i // 3
             column = i % 3
 
@@ -290,14 +289,12 @@ class Application(ctk.CTkFrame):
                                                     height=200)
         self.textbox_filtered_logs.pack(pady=20)
 
-    """
     def filter_checkbox_changed(self, var, label, *args):
         print(args)
         if var.get() == 1:
             print(f"Checkbox '{label}' changed to checked.")
         else:
             print(f"Checkbox '{label}' changed to unchecked.")
-    """
 
     def filter_logs(self, start_datetime_str, end_datetime_str):
         try:
@@ -313,8 +310,24 @@ class Application(ctk.CTkFrame):
             # If the datetime format is correct, remove the error message label if it exists
             self.clear_filter_error_message()
 
+        # Get checked categories for search
+        checked_boxes = [list(self.categories.values())[i] for i, var in enumerate(self.checkbox_vars) if
+                         var.get() == 1]
+
         # Continue with filtering logs
-        filtered_logs = self.filter_logs_by_date_time(start_datetime, end_datetime)
+        filtered_logs = []
+        # Read logs from the log file
+        with open(self.logFile, 'r', encoding='utf-8') as file:
+            for line in file:
+                # Extract timestamp and log message from each line
+                parts = line.split(' ')
+                timestamp_date_str, timestamp_time_str, log_message = parts
+                log_timestamp = datetime.strptime(timestamp_date_str + ' ' + timestamp_time_str,
+                                                  "%Y-%m-%d %H:%M:%S")
+
+                # Check if the log timestamp is within the specified range
+                if (start_datetime <= log_timestamp <= end_datetime) and (log_message.strip() in checked_boxes):
+                    filtered_logs.append(line.strip())
 
         # Display the filtered logs in the textbox
         self.textbox_filtered_logs.configure(state='normal')
@@ -322,35 +335,6 @@ class Application(ctk.CTkFrame):
         for log in filtered_logs:
             self.textbox_filtered_logs.insert('end', log + '\n')  # Add each filtered log
         self.textbox_filtered_logs.configure(state='disabled')
-
-    def filter_logs_by_date_time(self, start_datetime, end_datetime):
-        filtered_logs = []
-        # Read logs from the log file
-        with open(self.logFile, 'r', encoding='utf-8') as file:
-            for line in file:
-                # Extract timestamp and log message from each line
-                parts = line.strip().split(' ')
-                if len(parts) == 3:
-                    timestamp_date_str, timestamp_time_str, log_message = parts
-                    log_timestamp = datetime.strptime(timestamp_date_str + ' ' + timestamp_time_str,
-                                                      "%Y-%m-%d %H:%M:%S")
-
-                    # Check if the log timestamp is within the specified range
-                    if start_datetime <= log_timestamp <= end_datetime:
-                        # Check if the log message matches any of the checked checkboxes
-                        if self.check_log_message(log_message):
-                            filtered_logs.append(line.strip())
-
-        return filtered_logs
-
-    def check_log_message(self, log_message):
-        # Check if the log message matches any of the checked checkboxes
-        for i, checkbox_var in enumerate(self.checkbox_vars):
-            if checkbox_var.get() == 1:
-                label_text = self.categories[i]
-                if label_text in log_message:
-                    return True
-        return False
 
     def show_filter_error_message(self, message):
         # Create or update an error message label
